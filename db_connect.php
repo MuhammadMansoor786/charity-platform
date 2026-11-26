@@ -29,16 +29,18 @@ try {
 
     if ($sslEnabled) {
         $sslCaFile = getenv('DB_SSL_CA_FILE');
-        if ($sslCaFile === false || !is_readable($sslCaFile)) {
-            throw new RuntimeException('DB_SSL_CA_FILE must point to a readable Aiven CA certificate.');
-        }
+        if ($sslCaFile !== false && $sslCaFile !== '') {
+            if (!is_readable($sslCaFile)) {
+                throw new RuntimeException('DB_SSL_CA_FILE must point to a readable CA certificate.');
+            }
 
-        if (!defined('MYSQLI_OPT_SSL_VERIFY_SERVER_CERT')) {
-            throw new RuntimeException('This PHP MySQLi build cannot verify the database TLS certificate.');
-        }
+            if (!defined('MYSQLI_OPT_SSL_VERIFY_SERVER_CERT')) {
+                throw new RuntimeException('This PHP MySQLi build cannot verify the database TLS certificate.');
+            }
 
-        $conn->options(MYSQLI_OPT_SSL_VERIFY_SERVER_CERT, true);
-        $conn->ssl_set(null, null, $sslCaFile, null, null);
+            $conn->options(MYSQLI_OPT_SSL_VERIFY_SERVER_CERT, true);
+            $conn->ssl_set(null, null, $sslCaFile, null, null);
+        }
     }
 
     $flags = $sslEnabled ? MYSQLI_CLIENT_SSL : 0;

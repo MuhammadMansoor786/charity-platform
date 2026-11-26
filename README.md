@@ -23,9 +23,11 @@ The application reads these environment variables in `db_connect.php`:
 
 For Aiven, set the connection variables from the service's connection
 information, set `DB_SSL=true`, and provide its CA certificate through
-`DB_SSL_CA_FILE`. TLS certificate verification is enabled for this connection.
-Keep credentials and the CA file out of source control; configure them in the
-hosting provider's environment/secrets settings.
+`DB_SSL_CA_FILE` to enable server-certificate verification. If the CA file is
+omitted, the connection still requires TLS but cannot verify the server
+certificate. Prefer configuring the CA file in production. Keep credentials
+and the CA file out of source control; configure them in the hosting provider's
+environment/secrets settings.
 
 The checked-in `charity_db.sql` file contains both the schema and sample records.
 Review its data before importing it into a production database.
@@ -35,5 +37,6 @@ Review its data before importing it into a production database.
 This application serves PHP pages directly; it does not make browser-to-API
 requests and has no frontend build to publish on Netlify. It therefore cannot
 use the requested Netlify + FastAPI/Render split without an architectural
-migration. Deploy it to a PHP-capable web host (or add a PHP runtime/container
-configuration for the chosen host) and configure the database variables above.
+migration. The root `Dockerfile` provides PHP 8.2 with Apache and the `mysqli`
+and `pdo_mysql` extensions; it configures Apache to listen on Render's `PORT`
+(defaulting to 80). Configure the database variables above in Render.
